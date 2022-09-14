@@ -12,11 +12,6 @@ import click
 
 import adup.utils as utils
 
-try:
-    from .version import __version__
-except ImportError:  # pragma: no cover
-    __version__ = None
-
 CONTEXT_SETTINGS = dict(
     help_option_names=["-h", "--help"],
     auto_envvar_prefix="ADUP",
@@ -54,7 +49,7 @@ class Adup(object):
                 sys.exit(1)
 
 
-@click.version_option(version=__version__)
+@click.version_option()
 @click.command(
     cls=MyCLI,
     context_settings=CONTEXT_SETTINGS,
