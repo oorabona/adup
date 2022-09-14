@@ -32,7 +32,8 @@ class TestCliInit(unittest.TestCase):
             result = self.runner.invoke(cli, ["init"])
             self.assertEqual(result.exit_code, 1)
             self.assertIn(
-                "FATAL: cannot create directories for configuration file '/home/user/adup/adup.conf' !", result.output
+                "FATAL: cannot create directories for configuration file '/home/user/.config/adup/adup.conf' !",
+                result.output,
             )
 
     def test_init_with_args(self):
