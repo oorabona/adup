@@ -63,12 +63,18 @@ def makeArrayFromDict(*args):
 
 def get_config_filepath():
     return (
-        os.path.expanduser("~/adup/adup.conf") if os.environ.get("USER") else os.path.join("/etc", "adup", "adup.conf")
+        os.path.expanduser("~/.config/adup/adup.conf")
+        if os.environ.get("USER")
+        else os.path.join("/etc", "adup", "adup.conf")
     )
 
 
 def get_db_filepath():
-    return os.path.expanduser("~/adup/adup.db") if os.environ.get("USER") else os.path.join("/etc", "adup", "adup.db")
+    return (
+        os.path.expanduser("~/.config/adup/adup.db")
+        if os.environ.get("USER")
+        else os.path.join("/etc", "adup", "adup.db")
+    )
 
 
 DEFAULT_CONFIG = """
