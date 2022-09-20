@@ -64,6 +64,9 @@ def cli(ctx, editor, force):
         )
 
         click.secho("Configuration file '%s' created successfully." % filename, fg="green")
+        click.secho(
+            "You can now edit it again if needed, and run 'adup initdb' to initialize the database.", fg="green"
+        )
         sys.exit(0)
     except click.UsageError:  # pragma: no cover
         click.secho("FATAL: cannot edit configuration file '%s' !" % filename, fg="red")
@@ -76,7 +79,7 @@ def cli(ctx, editor, force):
                     fg="red",
                 )
                 sys.exit(1)
-        else:
+        else:  # pragma: no cover
             click.secho(
                 "FATAL: cannot create directories for configuration file '%s' !" % filename,
                 fg="red",
