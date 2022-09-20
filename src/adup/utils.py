@@ -28,6 +28,7 @@ def setup_logging(is_debug):
         )
 
 
+# Kudos to https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
 def debug(*args):
     frm = inspect.stack()[1]
     mod = inspect.getmodule(frm[0])
@@ -90,8 +91,8 @@ DEFAULT_CONFIG += f"""
 backend = sqlite
 
 [paths]
-include =
-exclude =
+include[] =
+exclude[] =
 
 [sqlalchemy]
 echo = False
@@ -114,13 +115,12 @@ backend = sqlite
 # You can also specify them on the command line.
 # Note : excluding paths is done after including paths.
 [paths]
-include =
-exclude =
+include[] =
+exclude[] =
 
 # Specific parameters for Alchemy should be set here.
 [sqlalchemy]
 echo = False
-future = True
 
 # The following options are used by the sqlite3 backend.
 [sqlite]
@@ -129,13 +129,49 @@ future = True
 db = {get_db_filepath()}
 """
 
+# Helper functions to handle multi value options
+config_multi_value_dict = {}
+
+
+def multi_value_option(option):
+    _option = option.lower()
+    if _option.endswith("[]"):
+        _option = _option[:-2]
+
+        # Given a key get the following auto increment value
+        # e.g. if key is foo, then foo1, foo2, foo3, etc.
+        if config_multi_value_dict.get(_option) is None:
+            config_multi_value_dict[_option] = 1
+        else:
+            config_multi_value_dict[_option] += 1
+
+        return f"{_option}_{config_multi_value_dict[_option]}"
+
+    return _option
+
+
+def get_multi_value_option(cp, option):
+    _option = option.lower()
+    if _option.endswith("[]"):
+        _option = _option[:-2]
+        max_option_index = config_multi_value_dict.get(_option)
+        if max_option_index is None:
+            return None
+        else:
+            return [cp[f"{_option}_{i}"] for i in range(1, max_option_index + 1)]
+
+    return _option
+
 
 def loadConfig(configfile):
     debug("Loading config file %s" % configfile)
 
     with open(configfile) as f:
-        config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), allow_no_value=True)
-        config.optionxform = str
+        config = configparser.ConfigParser(
+            interpolation=configparser.ExtendedInterpolation(),
+            allow_no_value=True,
+        )
+        config.optionxform = multi_value_option
         config.read_string(DEFAULT_CONFIG)
         config.read_file(f)
         return config
