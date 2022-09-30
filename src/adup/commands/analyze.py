@@ -3,7 +3,8 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import getEngine, getMatchingConditions
+from adup.exceptions import NoFileInDatabase
+from adup.utils import debug, getEngine, getMatchingConditions
 
 
 @click.group()
@@ -12,9 +13,10 @@ def cli():  # noqa: F811
 
 
 @cli.command()
-@click.argument(
+@click.option(
+    "-t",
+    "--type",
     "conditions",
-    nargs=1,
     type=click.Choice(["samehash4k", "samehash", "samemtime", "samesize", "samename", "all", "every"]),
     default="samehash",
 )
@@ -27,7 +29,11 @@ def cli(ctx, conditions):
     getEngine(ctx.config)
 
     # Process conditions
-    listOfConditions = getMatchingConditions(conditions)
+    debug("Conditions given in command line: {}".format(conditions))
+    listOfConditions = getMatchingConditions([conditions])
+    debug("List of conditions to apply:")
+    for condition in listOfConditions:
+        debug(" - {}".format(" and ".join(condition)))
 
     # Get the list of all hashes with more than one occurrence
     results = {}
@@ -37,12 +43,17 @@ def cli(ctx, conditions):
         for conditions in listOfConditions:
             count, size = analyzeDuplicates(conditions)
             results[" and ".join(conditions)] = count, size
+    except NoFileInDatabase:
+        click.secho("No file in database. Nothing to do. Please run 'updatedb' command first.", fg="yellow")
+        sys.exit(1)
     except Exception as exc:  # pragma: no cover
         click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
         sys.exit(1)
 
     for key, value in results.items():
         if value[0] > 0:
-            click.secho("Found %d possible duplicates (total size: %d) for %s" % (value[0], value[1], key), bold=True)
+            click.secho(
+                "Found %d possible duplicates (total size: %d bytes) for %s" % (value[0], value[1], key), bold=True
+            )
 
     sys.exit(0)
