@@ -9,6 +9,8 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql.expression import ClauseElement, Executable
 
+from adup.exceptions import NoFileInDatabase
+
 from .utils import debug, str2bool
 
 # We need to have it global so we can use it every where
@@ -222,6 +224,15 @@ def analyzeDuplicates(conditions):
     # Create a session
     with Session() as session:
         session.begin()
+        try:
+            # Do we have files in our database ?
+            result = session.query(Files).first()
+            if result is None:
+                raise NoFileInDatabase("No file in database, please run updatedb first")
+        except Exception:
+            session.rollback()
+            raise
+
         stmt = sa.lambda_stmt(
             lambda: sa.select(
                 sa.func.row_number().over().label("id"),
