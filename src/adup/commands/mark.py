@@ -3,7 +3,7 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import getEngine, getMatchingConditions
+from adup.utils import debug, getEngine, getMatchingConditions
 
 
 @click.group()
@@ -12,9 +12,10 @@ def cli():  # noqa: F811
 
 
 @cli.command()
-@click.argument(
+@click.option(
+    "-t",
+    "--type",
     "conditions",
-    nargs=1,
     type=click.Choice(["samehash4k", "samehash", "samemtime", "samesize", "samename", "all", "every"]),
     default="samehash",
 )
@@ -26,7 +27,7 @@ def cli():  # noqa: F811
 @click.argument(
     "which",
     nargs=1,
-    type=click.Choice(["older", "newer", "larger", "smaller", "all"]),
+    type=click.Choice(["older", "newer", "larger", "smaller", "all", "empty"]),
 )
 @click.option(
     "-n",
@@ -53,7 +54,11 @@ def cli(ctx, conditions, operation, which, name, path):
     getEngine(ctx.config)
 
     # Process conditions
-    listOfConditions = getMatchingConditions(conditions)
+    debug("Conditions given in command line: {}".format(conditions))
+    listOfConditions = getMatchingConditions([conditions])
+    debug("List of conditions to apply:")
+    for condition in listOfConditions:
+        debug(" - {}".format(" and ".join(condition)))
 
     if which == "all":
         whichFg = "red"

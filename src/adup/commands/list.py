@@ -13,9 +13,10 @@ def cli():  # noqa: F811
 
 
 @cli.command()
-@click.argument(
+@click.option(
+    "-t",
+    "--type",
     "conditions",
-    nargs=1,
     type=click.Choice(["samehash4k", "samehash", "samemtime", "samesize", "samename", "all", "every"]),
     default="samehash",
 )
@@ -41,11 +42,16 @@ def cli(ctx, conditions, operation, hideColumns):
     getEngine(ctx.config)
 
     # Process conditions
-    listOfConditions = getMatchingConditions(conditions)
+    debug("Conditions given in command line: {}".format(conditions))
+    listOfConditions = getMatchingConditions([conditions])
+    debug("List of conditions to apply:")
+    for condition in listOfConditions:
+        debug(" - {}".format(" and ".join(condition)))
 
     # Debug
-    debug("Conditions: %s" % listOfConditions)
-    debug("hideColumns: '%s'" % " and ".join(hideColumns))
+    debug("List of columns to hide:")
+    for column in hideColumns:
+        debug(" - {}".format(column))
 
     click.secho(f"Listing files marked as {operation} for condition '{conditions}'.", bold=True)
 
@@ -65,6 +71,6 @@ def cli(ctx, conditions, operation, hideColumns):
         totalSize = sum(x[index] for x in results)
         click.secho(f"Total: {len(results)} files / {totalSize} bytes", bold=True)
     else:
-        click.secho(f"No duplicates found for this combination '{conditions}' !", fg="yellow")
+        click.secho(f"No {operation} duplicates found for this combination '{conditions}' !", fg="yellow")
 
     sys.exit(0)
