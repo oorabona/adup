@@ -365,6 +365,14 @@ def markDuplicates(conditions, operation, which, name, path):
                             and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
                         )
                     sq = session.query(Duplicates.id).select_from(condSQL).where(Duplicates.size == sa.column("comp"))
+                elif which == "empty":
+                    sq = sa.select(Duplicates.id).where(Duplicates.size == 0)
+                    if name is not None and path is None:
+                        sq = sq.where(Duplicates.name.op("GLOB")(name))
+                    elif path is not None and name is None:
+                        sq = sq.where(Duplicates.path.op("GLOB")(path))
+                    elif path is not None and name is not None:
+                        sq = sq.where(and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name)))
                 else:
                     raise ValueError("Which '%s' is not supported" % which)
 
