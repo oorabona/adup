@@ -229,33 +229,29 @@ def analyzeDuplicates(conditions):
                 sa.sql.expression.literal(False).label("selected"),
             )
         )
+
+        files = Files.__table__
+        duplicates = sa.orm.aliased(Files)
+        onclause = [files.c.path != duplicates.path]
         for condition in conditions:
             if condition == "samesize":
-                stmt += lambda s: s.where(
-                    Files.size.in_(sa.select(Files.size).group_by(Files.size).having(sa.func.count(Files.size) > 1))
-                )
+                onclause.append(files.c.size == duplicates.size)
             elif condition == "samehash":
-                stmt += lambda s: s.where(
-                    Files.hash.in_(sa.select(Files.hash).group_by(Files.hash).having(sa.func.count(Files.hash) > 1))
-                )
+                onclause.append(files.c.hash == duplicates.hash)
             elif condition == "samehash4k":
-                stmt += lambda s: s.where(
-                    Files.hash4k.in_(
-                        sa.select(Files.hash4k).group_by(Files.hash4k).having(sa.func.count(Files.hash4k) > 1)
-                    )
-                )
+                onclause.append(files.c.hash4k == duplicates.hash4k)
             elif condition == "samemtime":
-                stmt += lambda s: s.where(
-                    Files.mtime.in_(sa.select(Files.mtime).group_by(Files.mtime).having(sa.func.count(Files.mtime) > 1))
-                )
+                onclause.append(files.c.mtime == duplicates.mtime)
             elif condition == "samename":
-                stmt += lambda s: s.where(
-                    Files.name.in_(sa.select(Files.name).group_by(Files.name).having(sa.func.count(Files.name) > 1))
-                )
+                onclause.append(files.c.name == duplicates.name)
             else:
                 raise ValueError("Condition %s is not supported" % condition)
 
-        session.execute(stmt)
+        stmt = (
+            stmt.select_from(files.join(duplicates, sa.and_(*onclause), isouter=False))
+            .group_by(*[c for c in Files.__table__.c if c.name not in ["last_seen"]])
+            .order_by(Files.name, Files.size, Files.mtime, Files.hash, Files.hash4k)
+        )
 
         # join conditions with _
         # they are already sorted so we just need to concatenate them
