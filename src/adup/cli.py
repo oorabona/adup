@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
 __metaclass__ = type
 
 import importlib
@@ -11,6 +9,8 @@ import typing
 import click
 
 import adup.utils as utils
+
+__version__ = importlib.metadata.version("adup")
 
 CONTEXT_SETTINGS = dict(
     help_option_names=["-h", "--help"],
@@ -46,10 +46,11 @@ class Adup(object):
                 self.config = utils.load_config(configfile)
             except Exception as exc:
                 click.secho("FATAL: cannot load configuration file: %s" % exc, fg="red")
+                click.secho("Please run 'adup init' first.", fg="yellow")
                 sys.exit(1)
 
 
-@click.version_option()
+@click.version_option(__version__)
 @click.command(
     cls=MyCLI,
     context_settings=CONTEXT_SETTINGS,
@@ -59,11 +60,10 @@ class Adup(object):
     "--config",
     "configfile",
     default=utils.get_config_filepath,
-    show_default=True,
     help="Config file to use.",
     type=click.Path(dir_okay=False),
 )
-@click.option("--debug/--no-debug", default=False, envvar="DEBUG", help="Enable debug mode.")
+@click.option("--debug/--no-debug", default=False, show_default=True, envvar="DEBUG", help="Enable debug mode.")
 @click.pass_context
 def cli(ctx, configfile, debug):
     """
@@ -75,4 +75,4 @@ def cli(ctx, configfile, debug):
 
 
 if __name__ == "__main__":
-    cli()
+    cli(prog_name="adup")
