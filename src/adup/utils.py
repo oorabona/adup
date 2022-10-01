@@ -16,11 +16,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 import configparser
-import inspect
 import itertools
-
-# Logging setup
-import logging
 import os
 import shutil
 import sys
@@ -29,30 +25,7 @@ from time import sleep
 import click
 from alive_progress import alive_bar
 
-
-def setup_logging(is_debug):
-    if is_debug:
-        logging.basicConfig(
-            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            level=logging.DEBUG,
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    else:
-        logging.basicConfig(
-            format="%(asctime)s %(levelname)s %(message)s",
-            level=logging.INFO,
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-
-
-# Kudos to https://stackoverflow.com/questions/1095543/get-name-of-calling-functions-module-in-python
-def debug(*args):
-    frm = inspect.stack()[1]
-    mod = inspect.getmodule(frm[0])
-    # Get the filename
-    filename = mod.__name__
-    log = logging.getLogger(filename)
-    return log.debug(*args)
+from adup.logging import debug, error, info, warn
 
 
 # Convert string representation of true / false to boolean
@@ -249,9 +222,9 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
     try:
         from .backends import list_duplicates
 
-        columns, results = list_duplicates(operation, listOfConditions)
+        columns, results = list_duplicates(operation, listOfConditions, [])
     except Exception as exc:
-        click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
+        error("FATAL: cannot execute command in database: %s" % exc)
         sys.exit(1)
 
     # tabulate results
@@ -259,7 +232,7 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
         index = [index for index, name in enumerate(columns) if name == "size"][0]
         totalSize = sum(x[index] for x in results)
         if verbose:
-            click.secho(
+            info(
                 f"Attempting to {fileOp} files according to condition '{' and '.join(conditions)}': {len(results)} files / {totalSize} bytes",
                 bold=True,
             )
@@ -269,13 +242,12 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
             try:
                 availableSpace = shutil.disk_usage(to).free
             except Exception as exc:
-                click.secho(f"ERROR: cannot compute available space in {to}: {exc}", fg="red")
+                error(f"ERROR: cannot compute available space in {to}: {exc}")
                 sys.exit(1)
 
             if availableSpace < totalSize:
-                click.secho(
-                    f"ERROR: not enough space in {to}: {availableSpace} bytes available, {totalSize} bytes needed, you need {totalSize-availableSpace} bytes required.",
-                    fg="red",
+                error(
+                    f"ERROR: not enough space in {to}: {availableSpace} bytes available, {totalSize} bytes needed, you need {totalSize-availableSpace} bytes required."
                 )
                 sys.exit(1)
 
@@ -287,7 +259,7 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
         elif fileOp == "remove":
             fnOp = os.remove
         else:
-            click.secho(f"ERROR: unknown file operation {fileOp}", fg="red")
+            error(f"ERROR: unknown file operation {fileOp}")
             sys.exit(1)
 
         # Move files
@@ -310,7 +282,7 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
                         else:
                             fnOp(filepath, to)
                     except Exception as exc:
-                        click.secho(f"ERROR: cannot {fileOp} {filepath} to {to}: {exc}", fg="red")
+                        error(f"ERROR: cannot {fileOp} {filepath} to {to}: {exc}", fg="red")
                         sys.exit(1)
                 if verbose is True:
                     if disable_progress_bar is False:
@@ -320,6 +292,6 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
 
                 bar()
     else:
-        click.secho(f"No file found in {operation} condition '{conditions}'.", fg="yellow")
+        warn(f"No file found in {operation} condition '{conditions}'.")
 
     return

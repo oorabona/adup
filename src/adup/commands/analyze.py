@@ -21,7 +21,8 @@ import click
 
 from adup.cli import cli
 from adup.exceptions import NoFileInDatabase
-from adup.utils import debug, get_engine, get_matching_conditions
+from adup.logging import debug, error, info
+from adup.utils import get_engine, get_matching_conditions
 
 
 @click.group()
@@ -61,16 +62,14 @@ def cli(ctx, conditions):
             count, size = analyze_duplicates(conditions)
             results[" and ".join(conditions)] = count, size
     except NoFileInDatabase:
-        click.secho("No file in database. Nothing to do. Please run 'updatedb' command first.", fg="yellow")
+        error("No file in database. Nothing to do. Please run 'updatedb' command first.")
         sys.exit(1)
     except Exception as exc:  # pragma: no cover
-        click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
+        error("FATAL: cannot execute command in database: %s" % exc)
         sys.exit(1)
 
     for key, value in results.items():
         if value[0] > 0:
-            click.secho(
-                "Found %d possible duplicates (total size: %d bytes) for %s" % (value[0], value[1], key), bold=True
-            )
+            info("Found %d possible duplicates (total size: %d bytes) for %s" % (value[0], value[1], key))
 
     sys.exit(0)

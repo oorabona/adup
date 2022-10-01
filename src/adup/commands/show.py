@@ -21,6 +21,7 @@ import click
 from tabulate import tabulate
 
 from adup.cli import cli
+from adup.logging import error, info, warn
 from adup.utils import get_engine, get_matching_conditions, make_array_from_dict
 
 
@@ -70,18 +71,18 @@ def cli(ctx, name, path, details):
 
         columns, results = show_duplicates(listOfConditions, name, path)
     except Exception as exc:  # pragma: no cover
-        click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
+        error("FATAL: cannot execute command in database: %s" % exc)
         sys.exit(1)
 
     # tabulate results
     if len(results) > 0:
-        click.secho(f"Total number of occurrences: {len(results)}", bold=True)
+        info(f"Total number of occurrences: {len(results)}")
 
         if details is True:
             click.secho(tabulate(results, headers=[name for name in columns], tablefmt="psql"))
 
         # Show summary
-        click.secho(f"Summary for {name} ({path}):", bold=True)
+        info(f"Summary for {name} ({path}):")
 
         occurrencePerCondition = {}
         numberOfTimesSelected = {}
@@ -126,6 +127,6 @@ def cli(ctx, name, path, details):
             tabulate(listPathsForFile, headers=["Paths", "Size", "Modification Time", "Selected"], tablefmt="psql")
         )
     else:
-        click.secho("No duplicates found.", fg="yellow")
+        warn("No duplicates found.")
 
     sys.exit(0)

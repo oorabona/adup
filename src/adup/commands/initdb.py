@@ -20,6 +20,7 @@ import sys
 import click
 
 from adup.cli import cli
+from adup.logging import error
 from adup.utils import get_engine
 
 
@@ -51,5 +52,5 @@ def cli(ctx, force):
 
         initdb(backend, force)
     except Exception as exc:  # pragma: no cover
-        click.secho("FATAL: cannot initialize database: %s" % exc, fg="red")
+        error("FATAL: cannot initialize database: %s" % exc, fg="red")
         sys.exit(1)
