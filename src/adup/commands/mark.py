@@ -3,7 +3,7 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import debug, getEngine, getMatchingConditions
+from adup.utils import debug, get_engine, get_matching_conditions
 
 
 @click.group()
@@ -51,11 +51,11 @@ def cli(ctx, conditions, operation, which, name, path):
     Marks duplicates as such in the database.
     """
     # Get backend from config file
-    getEngine(ctx.config)
+    get_engine(ctx.config)
 
     # Process conditions
     debug("Conditions given in command line: {}".format(conditions))
-    listOfConditions = getMatchingConditions([conditions])
+    listOfConditions = get_matching_conditions([conditions])
     debug("List of conditions to apply:")
     for condition in listOfConditions:
         debug(" - {}".format(" and ".join(condition)))
@@ -79,9 +79,9 @@ def cli(ctx, conditions, operation, which, name, path):
 
     # Let the backend do the job
     try:
-        from adup.backends import markDuplicates
+        from adup.backends import mark_duplicates
 
-        results = markDuplicates(listOfConditions, operation, which, name, path)
+        results = mark_duplicates(listOfConditions, operation, which, name, path)
         selectStyle = click.style("select", fg="red", bold=True)
         unselectStyle = click.style("unselect", fg="green", bold=True)
         grandTotalSelectCount = 0

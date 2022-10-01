@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 
 from adup.cli import cli
-from adup.utils import getEngine, getMatchingConditions, makeArrayFromDict
+from adup.utils import get_engine, get_matching_conditions, make_array_from_dict
 
 
 @click.group()
@@ -42,16 +42,16 @@ def cli(ctx, name, path, details):
     Shows detailed information about a specific file/path.
     """
     # Get backend from config file
-    getEngine(ctx.config)
+    get_engine(ctx.config)
 
     # Process conditions
-    listOfConditions = getMatchingConditions("every")
+    listOfConditions = get_matching_conditions("every")
 
     # Let the backend do the job
     try:
-        from adup.backends import showDuplicates
+        from adup.backends import show_duplicates
 
-        columns, results = showDuplicates(listOfConditions, name, path)
+        columns, results = show_duplicates(listOfConditions, name, path)
     except Exception as exc:  # pragma: no cover
         click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
         sys.exit(1)
@@ -93,7 +93,7 @@ def cli(ctx, name, path, details):
             ] not in listPathsForFile else listPathsForFile
 
         # Make tabular output
-        arrayOfOccurrencePerCondition = makeArrayFromDict(
+        arrayOfOccurrencePerCondition = make_array_from_dict(
             occurrencePerCondition, numberOfTimesSelected, numberOfTimesUnselected
         )
         click.secho(

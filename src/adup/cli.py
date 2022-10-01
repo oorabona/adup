@@ -43,7 +43,7 @@ class Adup(object):
         self.debug = debug
         if command != "init":
             try:
-                self.config = utils.loadConfig(configfile)
+                self.config = utils.load_config(configfile)
             except Exception as exc:
                 click.secho("FATAL: cannot load configuration file: %s" % exc, fg="red")
                 sys.exit(1)
