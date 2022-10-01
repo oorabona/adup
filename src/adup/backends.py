@@ -11,7 +11,7 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 
 from adup.exceptions import NoFileInDatabase
 
-from .utils import debug, str2bool
+from .utils import debug, getMatchingConditions, str2bool
 
 # We need to have it global so we can use it every where
 # and still use it as a context variable.
@@ -215,6 +215,18 @@ def initdb(backend, force):
     if force:
         print("Dropping all tables")
         Base.metadata.drop_all(backend)
+
+        # Remove all duplicates tables
+        listOfConditions = getMatchingConditions("every")
+        for conditions in listOfConditions:
+            joinCondition = "_".join(conditions)
+            DuplicatesModel = get_duplicates_model(joinCondition)
+            DuplicatesModel.__table__.drop(backend, checkfirst=True)
+
+        with backend.connect() as conn:
+            # with conn.begin():   # Optional: start a transaction
+            # Run VACUUM to free up space
+            conn.execute(sa.text("VACUUM"))
 
     print("Creating all tables")
     Base.metadata.create_all(backend)
