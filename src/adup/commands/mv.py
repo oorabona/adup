@@ -12,9 +12,10 @@ def cli():  # noqa: F811
 
 
 @cli.command()
-@click.argument(
+@click.option(
+    "-t",
+    "--type",
     "conditions",
-    nargs=1,
     type=click.Choice(["samehash4k", "samehash", "samemtime", "samesize", "samename", "all", "every"]),
     default="samehash",
 )
