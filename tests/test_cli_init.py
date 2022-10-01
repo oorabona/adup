@@ -40,13 +40,15 @@ class TestCliInit(unittest.TestCase):
         with self.runner.isolated_filesystem():
             result = self.runner.invoke(cli, ["--config", "tests/new.cfg", "init", "-e", "cat"])
             self.assertEqual(result.exit_code, 0)
-            self.assertIn("Configuration file 'tests/new.cfg' created successfully.", result.output)
+            # check file exists
+            self.assertTrue(os.path.exists("tests/new.cfg"))
 
     def test_init_with_existing_config(self):
         with self.runner.isolated_filesystem():
             result = self.runner.invoke(cli, ["--config", "tests/new.cfg", "init", "-e", "cat"])
             self.assertEqual(result.exit_code, 0)
-            self.assertIn("Configuration file 'tests/new.cfg' created successfully.", result.output)
+            # check file exists
+            self.assertTrue(os.path.exists("tests/new.cfg"))
             result = self.runner.invoke(cli, ["--config", "tests/new.cfg", "init", "-e", "cat"])
             self.assertEqual(result.exit_code, 1)
             self.assertIn("configuration file 'tests/new.cfg' already exists", result.output)
