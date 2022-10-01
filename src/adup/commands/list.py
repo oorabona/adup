@@ -21,7 +21,8 @@ import click
 from tabulate import tabulate
 
 from adup.cli import cli
-from adup.utils import debug, get_engine, get_matching_conditions
+from adup.logging import debug, error, info, warn
+from adup.utils import get_engine, get_matching_conditions
 
 
 @click.group()
@@ -80,7 +81,7 @@ def cli(ctx, conditions, operation, hideColumns, showColumns):
     for column in columns_to_hide:
         debug(" - {}".format(column))
 
-    click.secho(f"Listing files marked as {operation} for condition '{conditions}'.", bold=True)
+    info(f"Listing files marked as {operation} for condition '{conditions}'.")
 
     # Let the backend do the job
     try:
@@ -88,7 +89,7 @@ def cli(ctx, conditions, operation, hideColumns, showColumns):
 
         columns, results = list_duplicates(operation, listOfConditions, columns_to_hide)
     except Exception as exc:  # pragma: no cover
-        click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
+        error("FATAL: cannot execute command in database: %s" % exc)
         sys.exit(1)
 
     # tabulate results
@@ -98,6 +99,6 @@ def cli(ctx, conditions, operation, hideColumns, showColumns):
         totalSize = sum(x[index] for x in results)
         click.secho(f"Total: {len(results)} files / {totalSize} bytes", bold=True)
     else:
-        click.secho(f"No {operation} duplicates found for this combination '{conditions}' !", fg="yellow")
+        warn(f"No {operation} duplicates found for this combination '{conditions}' !")
 
     sys.exit(0)

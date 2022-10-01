@@ -24,7 +24,8 @@ from alive_progress import alive_bar
 
 from adup.backends import refreshdb, updatedb
 from adup.cli import cli
-from adup.utils import debug, get_engine, get_multi_value_option
+from adup.logging import debug, error, info, warn
+from adup.utils import get_engine, get_multi_value_option
 
 
 @click.group()
@@ -110,7 +111,7 @@ def cli(ctx, include, exclude, verbose, refresh, progress):
 
     debug(f"After Excluded Paths: {paths}")
     if verbose:
-        click.secho("Updating information from paths: %s" % ", ".join(paths), fg="green")
+        info("Updating information from paths: %s" % ", ".join(paths))
 
     with alive_bar(manual=True, bar="blocks", spinner="dots_waves", dual_line=True, disable=not progress) as bar:
         current = 0
@@ -126,7 +127,7 @@ def cli(ctx, include, exclude, verbose, refresh, progress):
                     filename = entry.path
 
                     if verbose:
-                        click.secho("Updating information for : %s" % filename, fg="green")
+                        info("Updating information for : %s" % filename)
 
                     try:
                         stat = entry.stat(follow_symlinks=False)
@@ -135,7 +136,7 @@ def cli(ctx, include, exclude, verbose, refresh, progress):
                         # Check if the file is a regular file
                         if not stat.st_mode & 0o100000:
                             if verbose:
-                                click.secho("File %s is not a regular file, skipping" % filename, fg="red")
+                                warn("File %s is not a regular file, skipping" % filename)
                             continue
 
                         updatedb(os.path.dirname(filename), os.path.basename(filename), stat)
@@ -146,19 +147,19 @@ def cli(ctx, include, exclude, verbose, refresh, progress):
                             bar(progress)
                     except OSError as e:  # pragma: no cover
                         if e.errno == errno.ENOENT:
-                            click.secho("File %s does not exist, skipping" % filename, fg="red")
+                            error("File %s does not exist, skipping" % filename)
                             continue
                         else:
                             raise
                     except Exception as e:  # pragma: no cover
-                        click.secho("Error while updating {}: {}".format(filename, e), fg="red")
+                        error("Error while updating {}: {}".format(filename, e))
                         continue
 
     if refresh:
         if verbose:
-            click.secho("Refreshing database", fg="green")
+            info("Refreshing database")
         nbFilesBefore, nbFilesAfter = refreshdb()
         if verbose:
-            click.secho(f"Removed {nbFilesBefore - nbFilesAfter} files from the database", fg="green")
+            info(f"Removed {nbFilesBefore - nbFilesAfter} files from the database")
 
     sys.exit(0)

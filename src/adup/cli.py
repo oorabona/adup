@@ -26,6 +26,7 @@ import typing
 import click
 
 import adup.utils as utils
+from adup.logging import debug, error, setup_logging
 
 __version__ = importlib.metadata.version("adup")
 
@@ -58,12 +59,14 @@ class Adup(object):
     def __init__(self, command=None, configfile=None, debug=False):
         self.configfile = configfile
         self.debug = debug
+        setup_logging(debug)
+
         if command != "init":
             try:
                 self.config = utils.load_config(configfile)
             except Exception as exc:
-                click.secho("FATAL: cannot load configuration file: %s" % exc, fg="red")
-                click.secho("Please run 'adup init' first.", fg="yellow")
+                error(f"FATAL: cannot load configuration file: {exc}")
+                error("Please run 'adup init' first.")
                 sys.exit(1)
 
 
@@ -80,15 +83,16 @@ class Adup(object):
     help="Config file to use.",
     type=click.Path(dir_okay=False),
 )
-@click.option("--debug/--no-debug", default=False, show_default=True, envvar="DEBUG", help="Enable debug mode.")
+@click.option(
+    "--debug/--no-debug", "is_debug", default=False, show_default=True, envvar="DEBUG", help="Enable debug mode."
+)
 @click.pass_context
-def cli(ctx, configfile, debug):
+def cli(ctx, configfile, is_debug):
     """
     ADUP is a tool to manage your files and operate (bulk) operations on them.
     """
-    ctx.obj = Adup(ctx.invoked_subcommand, configfile, debug)
-    utils.setup_logging(debug)
-    utils.debug(f"Debug mode is {'on' if debug else 'off'}")
+    ctx.obj = Adup(ctx.invoked_subcommand, configfile, is_debug)
+    debug(f"Debug mode is {'on' if is_debug else 'off'}")
 
 
 if __name__ == "__main__":
