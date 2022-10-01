@@ -26,7 +26,8 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 
 from adup.exceptions import NoFileInDatabase
 
-from .utils import debug, get_matching_conditions, str2bool
+from .logging import debug, info
+from .utils import get_matching_conditions, str2bool
 
 # We need to have it global so we can use it every where
 # and still use it as a context variable.
@@ -228,7 +229,7 @@ def updatedb(root, file, stat, **kwargs):
 
 def initdb(backend, force):
     if force:
-        print("Dropping all tables")
+        info("Dropping all tables")
         Base.metadata.drop_all(backend)
 
         # Remove all duplicates tables
@@ -243,7 +244,7 @@ def initdb(backend, force):
             # Run VACUUM to free up space
             conn.execute(sa.text("VACUUM"))
 
-    print("Creating all tables")
+    info("Creating all tables")
     Base.metadata.create_all(backend)
 
 

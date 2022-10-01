@@ -22,7 +22,8 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import TPL_CONFIG_FILE, debug
+from adup.logging import debug, error, info
+from adup.utils import TPL_CONFIG_FILE
 
 
 @click.group()
@@ -80,25 +81,21 @@ def cli(ctx, editor, force):
             editor=editor,
         )
 
-        click.secho("Configuration file '%s' created successfully." % filename, fg="green")
-        click.secho(
-            "You can now edit it again if needed, and run 'adup initdb' to initialize the database.", fg="green"
-        )
+        info("Configuration file '%s' created successfully." % filename)
+        info("You can now edit it again if needed, and run 'adup initdb' to initialize the database.")
         sys.exit(0)
     except click.UsageError:  # pragma: no cover
-        click.secho("FATAL: cannot edit configuration file '%s' !" % filename, fg="red")
+        error("FATAL: cannot edit configuration file '%s' !" % filename)
         sys.exit(1)
     except OSError as exc:
         if exc.errno == errno.EEXIST:
             if not force:
-                click.secho(
+                error(
                     "FATAL: configuration file '%s' already exists !" % filename,
-                    fg="red",
                 )
                 sys.exit(1)
         else:  # pragma: no cover
-            click.secho(
+            error(
                 "FATAL: cannot create directories for configuration file '%s' !" % filename,
-                fg="red",
             )
             sys.exit(1)

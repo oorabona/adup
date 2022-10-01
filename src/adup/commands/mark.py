@@ -20,7 +20,8 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import debug, get_engine, get_matching_conditions
+from adup.logging import debug, error
+from adup.utils import get_engine, get_matching_conditions
 
 
 @click.group()
@@ -90,9 +91,15 @@ def cli(ctx, conditions, operation, which, name, path):
         raise ValueError("Invalid value for 'operation'")  # pragma: no cover
 
     for conditions in listOfConditions:
-        click.secho(f"{which.title()} ", bold=True, fg=whichFg, nl=False)
-        click.secho(f"file(s) of {', '.join(conditions)} will be marked to ", bold=True, nl=False)
-        click.secho(f"{operation}", bold=True, fg=operationFg)
+        click.echo(
+            " ".join(
+                [
+                    click.style(f"{which.title()}", fg=whichFg, bold=True),
+                    click.style(f"file(s) of {', '.join(conditions)} will be", bold=True),
+                    click.style(f"{operation}ed", fg=operationFg, bold=True),
+                ]
+            )
+        )
 
     # Let the backend do the job
     try:
@@ -135,7 +142,7 @@ def cli(ctx, conditions, operation, which, name, path):
             bold=True,
         )
     except Exception as exc:  # pragma: no cover
-        click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
+        error("FATAL: cannot execute command in database: %s" % exc)
         sys.exit(1)
 
     sys.exit(0)
