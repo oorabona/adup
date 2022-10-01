@@ -15,11 +15,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-import argparse
 import hashlib
 import os
 from datetime import datetime, timezone
-from operator import and_
 
 import sqlalchemy as sa
 from sqlalchemy.ext.compiler import compiles
@@ -148,7 +146,7 @@ def create_engine(backend, config):
         else:
             try:
                 kwargs[key] = str2bool(value)
-            except argparse.ArgumentTypeError:
+            except TypeError:
                 kwargs[key] = value
 
     debug("Using backend {} with options {}".format(backendURI, kwargs))
@@ -352,7 +350,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                     elif path is not None and name is None:
                         sq = sq.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
-                        sq = sq.where(and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name)))
+                        sq = sq.where(sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name)))
                 elif which == "older":
                     condSQL = sa.select(
                         Duplicates.id, Duplicates.name, sa.func.min(Duplicates.mtime).label("comp")
@@ -363,7 +361,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                         condSQL = condSQL.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
                         condSQL = condSQL.where(
-                            and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
+                            sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
                         )
                     sq = session.query(Duplicates.id).select_from(condSQL).where(Duplicates.mtime == sa.column("comp"))
                 elif which == "newer":
@@ -376,7 +374,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                         condSQL = condSQL.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
                         condSQL = condSQL.where(
-                            and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
+                            sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
                         )
                     sq = session.query(Duplicates.id).select_from(condSQL).where(Duplicates.mtime == sa.column("comp"))
                 elif which == "larger":
@@ -389,7 +387,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                         condSQL = condSQL.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
                         condSQL = condSQL.where(
-                            and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
+                            sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
                         )
                     sq = session.query(Duplicates.id).select_from(condSQL).where(Duplicates.size == sa.column("comp"))
                 elif which == "smaller":
@@ -402,7 +400,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                         condSQL = condSQL.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
                         condSQL = condSQL.where(
-                            and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
+                            sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name))
                         )
                     sq = session.query(Duplicates.id).select_from(condSQL).where(Duplicates.size == sa.column("comp"))
                 elif which == "empty":
@@ -412,7 +410,7 @@ def mark_duplicates(conditions, operation, which, name, path):
                     elif path is not None and name is None:
                         sq = sq.where(Duplicates.path.op("GLOB")(path))
                     elif path is not None and name is not None:
-                        sq = sq.where(and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name)))
+                        sq = sq.where(sa.and_(Duplicates.path.op("GLOB")(path), Duplicates.name.op("GLOB")(name)))
                 else:
                     raise ValueError("Which '%s' is not supported" % which)
 
@@ -500,7 +498,7 @@ def show_duplicates(listOfConditions, name, path):
                 elif path is not None and name is None:
                     sq = sq.where(Duplicates.path == path)
                 elif path is not None and name is not None:
-                    sq = sq.where(and_(Duplicates.path == path, Duplicates.name == name))
+                    sq = sq.where(sa.and_(Duplicates.path == path, Duplicates.name == name))
 
                 all_queries.append(sq)
 
