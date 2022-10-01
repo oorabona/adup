@@ -48,7 +48,7 @@ def str2bool(v):
         raise TypeError("Boolean value expected.")
 
 
-def makeArrayFromDict(*args):
+def make_array_from_dict(*args):
     a = []
     for i in args:
         for k, v in i.items():
@@ -163,7 +163,7 @@ def get_multi_value_option(cp, option):
     return _option
 
 
-def loadConfig(configfile):
+def load_config(configfile):
     debug("Loading config file %s" % configfile)
 
     with open(configfile) as f:
@@ -178,7 +178,7 @@ def loadConfig(configfile):
 
 
 # Returns an Engine instance based on the configuration file
-def getEngine(config):
+def get_engine(config):
     backend = config.get("global", "backend")
     try:
         from .backends import create_engine
@@ -190,7 +190,7 @@ def getEngine(config):
         raise click.ClickException("Could not import backends (backend %s)" % backend)
 
 
-def getMatchingConditions(conditions=None):
+def get_matching_conditions(conditions=None):
     # Throw error if no conditions are specified
     if conditions is None or len(conditions) == 0:
         raise ValueError("No condition specified !")
@@ -222,17 +222,17 @@ def do_file_operation(conditions, operation, config, to, dryrun, verbose, fileOp
     The place where the file operation is done
     """
     # Get backend from config file
-    getEngine(config)
+    get_engine(config)
 
     # Process conditions
-    listOfConditions = getMatchingConditions([conditions])
+    listOfConditions = get_matching_conditions([conditions])
     debug("Conditions to apply : %s" % listOfConditions)
 
     # Let the backend do the job
     try:
-        from .backends import listDuplicates
+        from .backends import list_duplicates
 
-        columns, results = listDuplicates(operation, listOfConditions)
+        columns, results = list_duplicates(operation, listOfConditions)
     except Exception as exc:
         click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
         sys.exit(1)

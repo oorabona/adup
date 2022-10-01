@@ -3,7 +3,7 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.utils import getEngine
+from adup.utils import get_engine
 
 
 @click.group()
@@ -26,7 +26,7 @@ def cli(ctx, force):
     Initialize ADUP database.
     """
     # Get backend from config file
-    backend = getEngine(ctx.config)
+    backend = get_engine(ctx.config)
 
     # Initialize the database
     try:

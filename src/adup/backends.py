@@ -11,7 +11,7 @@ from sqlalchemy.sql.expression import ClauseElement, Executable
 
 from adup.exceptions import NoFileInDatabase
 
-from .utils import debug, getMatchingConditions, str2bool
+from .utils import debug, get_matching_conditions, str2bool
 
 # We need to have it global so we can use it every where
 # and still use it as a context variable.
@@ -217,7 +217,7 @@ def initdb(backend, force):
         Base.metadata.drop_all(backend)
 
         # Remove all duplicates tables
-        listOfConditions = getMatchingConditions("every")
+        listOfConditions = get_matching_conditions("every")
         for conditions in listOfConditions:
             joinCondition = "_".join(conditions)
             DuplicatesModel = get_duplicates_model(joinCondition)
@@ -232,7 +232,7 @@ def initdb(backend, force):
     Base.metadata.create_all(backend)
 
 
-def analyzeDuplicates(conditions):
+def analyze_duplicates(conditions):
     # Create a session
     with Session() as session:
         session.begin()
@@ -310,7 +310,7 @@ def analyzeDuplicates(conditions):
     return duplicatesCount, duplicatesSize
 
 
-def markDuplicates(conditions, operation, which, name, path):
+def mark_duplicates(conditions, operation, which, name, path):
     results = {}
     # Create a session
     with Session() as session:
@@ -420,7 +420,7 @@ def markDuplicates(conditions, operation, which, name, path):
     return results
 
 
-def listDuplicates(operation, conditions, hideColumns):
+def list_duplicates(operation, conditions, hideColumns):
     # Create a session
     with Session() as session:
         session.begin()
@@ -463,7 +463,7 @@ def listDuplicates(operation, conditions, hideColumns):
 # Show Duplicates
 # Show detailed information about a file name or path
 # given its status on each condition.
-def showDuplicates(listOfConditions, name, path):
+def show_duplicates(listOfConditions, name, path):
     # Create a session
     with Session() as session:
         session.begin()

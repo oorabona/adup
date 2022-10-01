@@ -4,7 +4,7 @@ import click
 from tabulate import tabulate
 
 from adup.cli import cli
-from adup.utils import debug, getEngine, getMatchingConditions
+from adup.utils import debug, get_engine, get_matching_conditions
 
 
 @click.group()
@@ -39,11 +39,11 @@ def cli(ctx, conditions, operation, hideColumns):
     List files marked as duplicates.
     """
     # Get backend from config file
-    getEngine(ctx.config)
+    get_engine(ctx.config)
 
     # Process conditions
     debug("Conditions given in command line: {}".format(conditions))
-    listOfConditions = getMatchingConditions([conditions])
+    listOfConditions = get_matching_conditions([conditions])
     debug("List of conditions to apply:")
     for condition in listOfConditions:
         debug(" - {}".format(" and ".join(condition)))
@@ -57,9 +57,9 @@ def cli(ctx, conditions, operation, hideColumns):
 
     # Let the backend do the job
     try:
-        from adup.backends import listDuplicates
+        from adup.backends import list_duplicates
 
-        columns, results = listDuplicates(operation, listOfConditions, hideColumns)
+        columns, results = list_duplicates(operation, listOfConditions, hideColumns)
     except Exception as exc:  # pragma: no cover
         click.secho("FATAL: cannot execute command in database: %s" % exc, fg="red")
         sys.exit(1)

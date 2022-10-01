@@ -7,7 +7,7 @@ from alive_progress import alive_bar
 
 from adup.backends import refreshdb, updatedb
 from adup.cli import cli
-from adup.utils import debug, get_multi_value_option, getEngine
+from adup.utils import debug, get_engine, get_multi_value_option
 
 
 @click.group()
@@ -67,7 +67,7 @@ def cli(ctx, include, exclude, verbose, refresh, progress):
     Update ADUP database.
     """
     # Get backend from config file
-    getEngine(ctx.config)
+    get_engine(ctx.config)
 
     # Get the list of all the paths to check
     pathsSection = ctx.config["paths"]

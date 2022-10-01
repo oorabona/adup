@@ -4,7 +4,7 @@ import click
 
 from adup.cli import cli
 from adup.exceptions import NoFileInDatabase
-from adup.utils import debug, getEngine, getMatchingConditions
+from adup.utils import debug, get_engine, get_matching_conditions
 
 
 @click.group()
@@ -26,11 +26,11 @@ def cli(ctx, conditions):
     Performs analyses to find duplicate files in the database.
     """
     # Get backend from config file
-    getEngine(ctx.config)
+    get_engine(ctx.config)
 
     # Process conditions
     debug("Conditions given in command line: {}".format(conditions))
-    listOfConditions = getMatchingConditions([conditions])
+    listOfConditions = get_matching_conditions([conditions])
     debug("List of conditions to apply:")
     for condition in listOfConditions:
         debug(" - {}".format(" and ".join(condition)))
@@ -38,10 +38,10 @@ def cli(ctx, conditions):
     # Get the list of all hashes with more than one occurrence
     results = {}
     try:
-        from adup.backends import analyzeDuplicates
+        from adup.backends import analyze_duplicates
 
         for conditions in listOfConditions:
-            count, size = analyzeDuplicates(conditions)
+            count, size = analyze_duplicates(conditions)
             results[" and ".join(conditions)] = count, size
     except NoFileInDatabase:
         click.secho("No file in database. Nothing to do. Please run 'updatedb' command first.", fg="yellow")
