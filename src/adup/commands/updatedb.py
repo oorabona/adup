@@ -82,7 +82,7 @@ def cli():  # noqa: F811
 @click.pass_obj
 def cli(ctx, include, exclude, verbose, refresh, progress):
     """
-    Update ADUP database.
+    Update ADUP database with files metadata.
     """
     # Get backend from config file
     get_engine(ctx.config)

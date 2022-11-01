@@ -37,6 +37,7 @@ def cli():  # noqa: F811
     "conditions",
     type=click.Choice(["samehash4k", "samehash", "samemtime", "samesize", "samename", "all", "every"]),
     default="samehash",
+    show_default=True,
 )
 @click.pass_obj
 def cli(ctx, conditions):
