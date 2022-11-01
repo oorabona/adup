@@ -22,7 +22,7 @@ from tabulate import tabulate
 
 from adup.cli import cli
 from adup.logging import debug, error, info, warn
-from adup.utils import get_engine, get_matching_conditions
+from adup.utils import get_engine, get_matching_conditions, get_multi_value_option
 
 
 @click.group()
@@ -41,7 +41,8 @@ def cli():  # noqa: F811
 @click.argument(
     "operation",
     nargs=1,
-    type=click.Choice(["selected", "unselected"]),
+    type=click.Choice(["selected", "unselected", "all"]),
+    default="all",
 )
 @click.option(
     "--hide",
@@ -75,9 +76,14 @@ def cli(ctx, conditions, operation, hideColumns, showColumns):
         debug(" - {}".format(" and ".join(condition)))
 
     # Show columns takes precedence over hide columns
-    columns_to_hide = set(hideColumns) - set(showColumns)
+    # and command line takes precedence over config file
+    _hide_columns = list(hideColumns) + get_multi_value_option(ctx.config["command.list"], "hide_columns[]", [])
+    _show_columns = list(showColumns) + get_multi_value_option(ctx.config["command.list"], "show_columns[]", [])
+    debug("Hide columns: {}".format(_hide_columns))
+    debug("Show columns: {}".format(_show_columns))
+    columns_to_hide = set(_hide_columns) - set(_show_columns)
 
-    debug("List of columns to hide:")
+    debug("Definitive list of columns to hide:")
     for column in columns_to_hide:
         debug(" - {}".format(column))
 
