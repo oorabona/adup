@@ -20,7 +20,7 @@ import sys
 import click
 
 from adup.cli import cli
-from adup.logging import error
+from adup.logging import error, info
 from adup.utils import get_engine
 
 
@@ -51,6 +51,9 @@ def cli(ctx, force):
         from adup.backends import initdb
 
         initdb(backend, force)
+
+        info("Database initialized.")
+        info("You can now update the database with files using 'updatedb' command.")
     except Exception as exc:  # pragma: no cover
         error("FATAL: cannot initialize database: %s" % exc, fg="red")
         sys.exit(1)
