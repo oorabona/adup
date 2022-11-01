@@ -459,6 +459,8 @@ def list_duplicates(operation, conditions, hideColumns):
                     ).where(
                         Duplicates.selected == False  # noqa E712
                     )
+                elif operation == "all":
+                    sq = sa.select(*[c for c in Duplicates.__table__.c if c.name not in ["id", *hideColumns]])
                 else:
                     raise ValueError("Operation %s is not supported" % operation)
 
