@@ -30,12 +30,20 @@ class ColorFormatter(logging.Formatter):
         "info": dict(fg="green", bold=True),
     }
 
+    emoji = {
+        "error": "❌",
+        "critical": "❌",
+        "debug": "🐛",
+        "warning": "⚠️",
+        "info": "ℹ️",
+    }
+
     def format(self, record):
         if not record.exc_info:
             level = record.levelname.lower()
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style(f"{level}: ", **self.colors[level])
+                prefix = click.style(f"{self.emoji[level]} {level}: ", **self.colors[level])
                 msg = "\n".join(prefix + x for x in msg.splitlines())
             return msg
         return logging.Formatter.format(self, record)
