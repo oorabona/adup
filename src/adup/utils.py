@@ -90,6 +90,14 @@ future = True
 
 [sqlite]
 db = {get_db_filepath()}
+
+[command.show]
+show_columns =
+hide_columns =
+
+[command.list]
+show_columns =
+hide_columns =
 """
 
 # Below is the default template for the configuration file.
@@ -117,6 +125,14 @@ echo = False
 
 # The database file to use.
 db = {get_db_filepath()}
+
+[command.show]
+show_columns[] =
+hide_columns[] =
+
+[command.list]
+show_columns[] =
+hide_columns[] =
 """
 
 # Helper functions to handle multi value options
@@ -140,13 +156,13 @@ def multi_value_option(option):
     return _option
 
 
-def get_multi_value_option(cp, option):
+def get_multi_value_option(cp, option, default=None):
     _option = option.lower()
     if _option.endswith("[]"):
         _option = _option[:-2]
         max_option_index = config_multi_value_dict.get(_option)
         if max_option_index is None:
-            return None
+            return default
         else:
             return [cp[f"{_option}_{i}"] for i in range(1, max_option_index + 1)]
 
