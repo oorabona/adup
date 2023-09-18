@@ -13,13 +13,13 @@ build-backend = 'setuptools.build_meta'
 [tool.versioningit.format]
 
 # Format used when there have been commits since the most recent tag:
-distance = "{base_version}.post{distance}+{vcs}{rev}"
+distance = "{base_version}.post{distance}"
 
 # Format used when there are uncommitted changes:
 dirty = "{base_version}+d{build_date:%Y%m%d}"
 
 # Format used when there are both commits and uncommitted changes:
-distance-dirty = "{base_version}.post{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
+distance-dirty = "{base_version}.post{distance}+d{build_date:%Y%m%d}"
 
 [tool.versioningit.template-fields]
 pep440 = true
