@@ -15,7 +15,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-__metaclass__ = type
 
 import importlib
 import os
@@ -55,7 +54,7 @@ class MyCLI(click.MultiCommand):
         return mod.cli
 
 
-class Adup(object):
+class Adup:
     def __init__(self, command=None, configfile=None, debug=False):
         self.configfile = configfile
         self.debug = debug
