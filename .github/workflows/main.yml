@@ -1,10 +1,10 @@
 name: CICD
 on:
   push:
-    branches: [master, 'develop/*']
+    branches: [main, 'develop/*']
     tags: [v*]
   pull_request:
-    branches: [master, 'develop']
+    branches: [main, develop]
 
 concurrency:
   group: check-${{ github.ref }}
@@ -12,8 +12,8 @@ concurrency:
 
 jobs:
   analyze:
-    # Run only if pushing on master
-    if: github.ref_name == 'master' && github.event_name == 'push'
+    # Run only if pushing on main
+    if: github.ref_name == 'main' && github.event_name == 'push'
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
@@ -199,7 +199,7 @@ jobs:
       - name: Build sdist and wheel
         run: python -m build -s -w . -o dist
       - name: Publish distribution 📦 to Test PyPI
-        if: ${{ contains(fromJson('["develop", "master"]'), github.event.pull_request.base.ref) }}
+        if: ${{ contains(fromJson('["develop", "main"]'), github.event.pull_request.base.ref) }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
