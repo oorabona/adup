@@ -10,6 +10,13 @@ build-backend = 'setuptools.build_meta'
 # Default taken from https://github.com/jwodder/versioningit
 [tool.versioningit]
 
+[tool.versioningit.vcs]
+method = "git"
+
+# Parameters to pass to the method:
+match = ["v*"]
+default-tag = "0.1.0"
+
 [tool.versioningit.format]
 
 # Format used when there have been commits since the most recent tag:
